@@ -1,0 +1,11 @@
+{
+  "name": "hy2",
+  "version": "1.0.0",
+  "description": "HY2 application",
+  "scripts": {
+    "start": "sh hy2.sh"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
