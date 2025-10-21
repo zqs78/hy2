@@ -1,3 +1,7 @@
+#!/bin/bash
+echo "Hello from hy2!"
+# 你的其他脚本内容
+
 #!/usr/bin/env bash
 set -e
 set -x
