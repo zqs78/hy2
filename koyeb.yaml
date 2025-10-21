@@ -1,0 +1,8 @@
+services:
+  - name: hy2-service
+    port: 443
+    routes: 
+      - /hy2
+    run: |
+      chmod +x ./hy2.sh
+      ./hy2.sh
