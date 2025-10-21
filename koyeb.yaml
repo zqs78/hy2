@@ -1,8 +1,13 @@
+name: hy2-app
 services:
   - name: hy2-service
-    port: 443
-    routes: 
-      - /hy2
-    run: |
-      chmod +x ./hy2.sh
-      ./hy2.sh
+    build:
+      dockerfile: Dockerfile
+    ports:
+      - port: 80
+        http:
+          paths:
+            - path: /
+    scaling:
+      min: 1
+      max: 1
