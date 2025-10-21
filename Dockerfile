@@ -1,6 +1,6 @@
 FROM alpine:latest
 
-RUN apk add --no-cache bash curl
+RUN apk add --no-cache bash curl netcat-openbsd
 
 WORKDIR /app
 COPY hy2.sh .
