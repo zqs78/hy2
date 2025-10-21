@@ -5,7 +5,6 @@ set -x
 # 配置信息
 HYSTERIA_VERSION="v2.6.4"
 SERVER_PORT="${PORT:-25522}"
-HEALTH_CHECK_PORT="8080"  # 新增：健康检查端口
 AUTH_PASSWORD="20250930"
 CERT_FILE="cert.pem"
 KEY_FILE="key.pem"
@@ -15,7 +14,6 @@ ALPN="h3"
 echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 echo "Hysteria2 Koyeb 部署脚本"
 echo "平台分配端口为: $SERVER_PORT"
-echo "健康检查端口为: $HEALTH_CHECK_PORT"
 echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 
 # 检测服务器架构
@@ -77,9 +75,11 @@ else
     echo "✅ 证书已存在，跳过生成"
 fi
 
-# 生成配置文件
+# 生成配置文件 - 修改为同时监听TCP和UDP
 cat > server.yaml <<EOF
-listen: "0.0.0.0:${SERVER_PORT}"
+listen:
+  - "0.0.0.0:${SERVER_PORT}/udp"  # UDP用于Hysteria2通信
+  - "0.0.0.0:${SERVER_PORT}/tcp"  # TCP用于健康检查
 tls:
   cert: "$(pwd)/${CERT_FILE}"
   key: "$(pwd)/${KEY_FILE}"
@@ -106,38 +106,9 @@ SERVER_DOMAIN="reluctant-kelsi-mf5c9x1rio-c3d70e48.koyeb.app"
 echo "🎉 部署成功！节点信息如下："
 echo "域名：$SERVER_DOMAIN"
 echo "端口：$SERVER_PORT"
-echo "健康检查端口：$HEALTH_CHECK_PORT"
 echo "密码：$AUTH_PASSWORD"
 echo "节点链接：hysteria2://${AUTH_PASSWORD}@${SERVER_DOMAIN}:${SERVER_PORT}?sni=${SNI}&alpn=${ALPN}&insecure=true#Hy2-Koyeb"
 
-# 启动TCP健康检查服务
-echo "🩺 启动TCP健康检查服务（端口$HEALTH_CHECK_PORT）..."
-{
-    while true; do
-        # 使用nc监听端口，当有连接时返回简单的HTTP响应
-        echo -e "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\n\r\nOK" | nc -l -p $HEALTH_CHECK_PORT -q 1
-        echo "✅ 健康检查请求收到 - $(date)"
-    done
-} &
-HEALTH_PID=$!
-echo "健康检查服务PID: $HEALTH_PID"
-
-# 启动Hysteria2服务
-echo "🚀 启动Hysteria2服务器..."
-"$BIN_PATH" server -c server.yaml &
-HYSTERIA_PID=$!
-echo "Hysteria2服务PID: $HYSTERIA_PID"
-
-# 设置退出时的清理函数
-cleanup() {
-    echo "🛑 正在停止服务..."
-    kill $HEALTH_PID 2>/dev/null || true
-    kill $HYSTERIA_PID 2>/dev/null || true
-    wait
-    echo "✅ 服务已停止"
-}
-trap cleanup EXIT
-
-# 等待所有子进程
-echo "⏳ 服务运行中..."
-wait
+# 启动服务
+echo "🚀 启动Hysteria2服务器（同时监听TCP和UDP）..."
+"$BIN_PATH" server -c server.yaml
