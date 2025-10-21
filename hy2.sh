@@ -100,7 +100,7 @@ EOF
 echo "✅ 配置文件生成成功"
 
 # 获取域名信息（部署后需要手动修改）
-SERVER_DOMAIN="你的Koyeb服务域名.koyeb.app"
+SERVER_DOMAIN="reluctant-kelsi-mf5c9x1rio-c3d70e48.koyeb.app"
 echo "🎉 部署成功！节点信息如下："
 echo "域名：$SERVER_DOMAIN"
 echo "端口：$SERVER_PORT"
