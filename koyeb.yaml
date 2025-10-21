@@ -4,7 +4,7 @@ services:
     build:
       dockerfile: Dockerfile
     ports:
-      - port: 80
+      - port: 25522
         http:
           paths:
             - path: /
